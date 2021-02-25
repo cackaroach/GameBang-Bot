@@ -7,7 +7,8 @@ using System.Text;
 namespace GameBang_Bot.Discord {
 	class ImageRender {
 		private const string DIR = "images";
-		private const string BROKEN = "broken";
+		private const string LOSER = "broken";
+		private const string WINNER = "spotlight";
 
 		public static MemoryStream GetMatchImageStream(string team1, string team2) {
 			var background = new Bitmap($"{DIR}/background.png");
@@ -33,12 +34,16 @@ namespace GameBang_Bot.Discord {
 			var background = new Bitmap(ms);
 			var graphic = Graphics.FromImage(background);
 
-			using var logo = new Bitmap($"{DIR}/{BROKEN}.png");
+			using var loser = new Bitmap($"{DIR}/{LOSER}.png");
+			using var winner = new Bitmap($"{DIR}/{WINNER}.png");
 
-			if(isRedWon)
-				graphic.DrawImage(logo, TargetPoint(logo.Width, logo.Height, 228, 274));
-			else
-				graphic.DrawImage(logo, TargetPoint(logo.Width, logo.Height, 760, 274));
+			if (!isRedWon) {
+				graphic.DrawImage(loser, TargetPoint(loser.Width, loser.Height, 228, 274));
+				graphic.DrawImage(winner, TargetPoint(winner.Width, winner.Height, 680, 208));
+			} else {
+				graphic.DrawImage(loser, TargetPoint(loser.Width, loser.Height, 760, 274));
+				graphic.DrawImage(winner, TargetPoint(winner.Width, winner.Height, 178, 208));
+			}
 			graphic.Save();
 
 			var ms2 = new MemoryStream();
