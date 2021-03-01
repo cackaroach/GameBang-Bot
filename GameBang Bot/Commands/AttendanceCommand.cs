@@ -23,7 +23,7 @@ namespace GameBang_Bot.Commands {
 			if (user == null)
 				throw new Exception("인증되지 않은 사용자입니다.");
 
-			var last = DbContext.UserPoints.AsQueryable().OrderByDescending(p => p.Date).FirstOrDefault(p => p.Reason == "Attendance");
+			var last = DbContext.UserPoints.AsQueryable().OrderByDescending(p => p.Date).FirstOrDefault(p => p.Reason == "Attendance" && p.UserId == Context.User.Id);
 
 			if (last == null || last?.Date.AddMinutes(PropertiesContext.Attendance.Span) < DateTime.Now || last.Date.Day != DateTime.Now.Day) {
 				DbContext.UserPoints.Add(new UserPoint() {
