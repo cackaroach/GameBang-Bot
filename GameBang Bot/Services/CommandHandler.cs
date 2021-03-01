@@ -26,12 +26,12 @@ namespace GameBang_Bot.Services {
 		}
 
 		private async Task Commands_CommandExecuted(Optional<CommandInfo> arg1, ICommandContext arg2, IResult arg3) {
-			switch(arg3.Error) {
+			switch (arg3.Error) {
 				case CommandError.Exception:
-					if(arg3 is ExecuteResult ex) {
-						if(ex.Exception.InnerException != null)
+					if (arg3 is ExecuteResult ex) {
+						if (ex.Exception.InnerException != null)
 							await arg2.Channel.SendMessageAsync(embed: GeneralEmbedBuilder.ErrorEmbed(arg2, $"{ex.Exception.InnerException.Message}").Build());
-						else 
+						else
 							await arg2.Channel.SendMessageAsync(embed: GeneralEmbedBuilder.ErrorEmbed(arg2, $"{ex.Exception.Message}").Build());
 					} else
 						await arg2.Channel.SendMessageAsync(embed: GeneralEmbedBuilder.ErrorEmbed(arg2, arg3.ErrorReason).Build());
@@ -51,21 +51,32 @@ namespace GameBang_Bot.Services {
 			int argPos = 0;
 			SocketCommandContext context = new SocketCommandContext(discord, message);
 
-			if (message.HasStringPrefix(PropertiesContext.Discord.Prefix, ref argPos) || message.HasMentionPrefix(discord.CurrentUser, ref argPos)) {
-				switch (message.Content[1..].ToLower()) {
-					case "help":
-					case "?":
-					case "도움말":
-					case "명령어":
-						var embed = GeneralEmbedBuilder.HelpEmbed(context, commands);
-						if(embed != null)
-							await context.Channel.SendMessageAsync(embed: embed);
-						break;
-					default:
-						IResult result = await commands.ExecuteAsync(context, argPos, provider);
-						break;
-				}
+			foreach (var m in commands.Modules) {
+				if (m.Preconditions.Count > 0) {
+					var type = PropertiesContext.Channel.GetType();
+					var property = type.GetProperty(m.Name + "Id");
+					ulong channelId = (UInt64)property.GetValue(PropertiesContext.Channel);
 
+					if (channelId == context.Channel.Id) {
+						if (context.Guild.Id == PropertiesContext.Discord.ServerId && (message.HasStringPrefix(PropertiesContext.Discord.Prefix, ref argPos) || message.HasMentionPrefix(discord.CurrentUser, ref argPos))) {
+							switch (message.Content[1..].ToLower()) {
+								case "help":
+								case "?":
+								case "도움말":
+								case "명령어":
+									var embed = GeneralEmbedBuilder.HelpEmbed(context, m);
+									if (embed != null)
+										await context.Channel.SendMessageAsync(embed: embed);
+									break;
+								default:
+									IResult result = await commands.ExecuteAsync(context, argPos, provider);
+									break;
+							}
+
+							break;
+						}
+					}
+				}
 			}
 		}
 	}

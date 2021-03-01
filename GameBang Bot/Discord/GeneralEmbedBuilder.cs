@@ -76,7 +76,7 @@ namespace GameBang_Bot.Discord {
 			return embed.Build();
 		}
 
-		public static Embed HelpEmbed(ICommandContext context, CommandService commands) {
+		public static Embed HelpEmbed(ICommandContext context, ModuleInfo module) {
 			var embed = new EmbedBuilder() {
 				Color = Color.Orange,
 				Title = "명령어",
@@ -88,37 +88,27 @@ namespace GameBang_Bot.Discord {
 				}
 			};
 
-			foreach (var m in commands.Modules) {
-				if (m.Preconditions.Count > 0) {
-					var type = PropertiesContext.Channel.GetType();
-					var property = type.GetProperty(m.Name + "Id");
-					ulong channelId = (UInt64)property.GetValue(PropertiesContext.Channel);
+			embed.Description = module.Summary;
 
-					if (channelId == context.Channel.Id) {
-						embed.Description = m.Summary;
+			foreach (var c in module.Commands) {
+				var param = new StringBuilder($"!{c.Name}");
+				foreach (var p in c.Parameters)
+					if (p.Summary != null)
+						param.Append($" {p.Summary}");
+					else
+						param.Append($" {p.Name}");
 
-						foreach (var c in m.Commands) {
-							var param = new StringBuilder($"!{c.Name}");
-							foreach (var p in c.Parameters)
-								if (p.Summary != null)
-									param.Append($" {p.Summary}");
-								else
-									param.Append($" {p.Name}");
-
-							StringBuilder alias = null;
-							if (c.Aliases.Count > 1) {
-								alias = new StringBuilder($"동명령어:");
-								foreach (var a in c.Aliases)
-									alias.Append($" !{a}");
-							}
-
-							var sum = c.Summary;
-							if (alias != null)
-								sum += "\n" + alias.ToString();
-							embed.AddField(param.ToString(), sum);
-						}
-					}
+				StringBuilder alias = null;
+				if (c.Aliases.Count > 1) {
+					alias = new StringBuilder($"동명령어:");
+					foreach (var a in c.Aliases)
+						alias.Append($" !{a}");
 				}
+
+				var sum = c.Summary;
+				if (alias != null)
+					sum += "\n" + alias.ToString();
+				embed.AddField(param.ToString(), sum);
 			}
 
 			if (embed.Fields.Count > 0)
