@@ -13,6 +13,7 @@ namespace GameBang_Bot.LeagueOfLegends.Converters {
 				case "ranked_solo_5x5":
 					return QueueTypeEnum.RankedSolo;
 				case "ranked_team_5x5":
+				case "ranked_flex_sr":
 					return QueueTypeEnum.RankedTeam;
 				default:
 					return QueueTypeEnum.Unknown;
