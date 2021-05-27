@@ -1,2 +1,2 @@
 # GameBang-Bot
-보지마
+디스코드 봇
