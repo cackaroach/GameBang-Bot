@@ -1,2 +1,2 @@
 # GameBang-Bot
-디스코드 봇
+.NET Discord Bot 템플릿으로 사용하기 좋습니다.
